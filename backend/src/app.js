@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+
 import aiRoutes from "./routes/aiRoutes.js";
-import { errorHandler } from "./middleware/errorMiddleware.js";
 import incidentRoutes from "./routes/incidentRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import { errorHandler } from "./middleware/errorMiddleware.js";
+
 const app = express();
 
 app.use(helmet());
@@ -20,8 +22,12 @@ app.get("/", (req, res) => {
   });
 });
 
+// Routes
 app.use("/api/incidents", incidentRoutes);
 app.use("/api/ai", aiRoutes);
-app.use(errorHandler);
 app.use("/api/dashboard", dashboardRoutes);
+
+// Error Handler (keep this last)
+app.use(errorHandler);
+
 export default app;

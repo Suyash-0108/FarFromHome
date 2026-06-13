@@ -27,16 +27,3 @@ const startServer = async () => {
 };
 
 startServer();
-const express = require("express");
-const app = express();
-
-const aiRoutes = require("./routes/ai");
-
-app.use(express.json());
-
-// Register AI routes here
-app.use("/api/ai", aiRoutes);
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
