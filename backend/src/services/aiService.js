@@ -1,4 +1,4 @@
-import axios from "axios";
+import ai from "../config/gemini.js";
 
 export async function analyzeEmergency(description) {
   try {
@@ -27,24 +27,26 @@ Emergency Report:
 ${description}
 `;
 
-    const response = await axios.post(
-      "http://localhost:11434/api/generate",
-      {
-        model: "llama3.1:8b",
-        prompt,
-        stream: false,
-      }
-    );
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
 
-    const text = response.data.response
+    const text = response.text
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
 
-    return JSON.parse(text);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      throw new Error("No JSON found");
+    }
+
+    return JSON.parse(jsonMatch[0]);
 
   } catch (error) {
-    console.error("Ollama Analysis Error:", error);
+    console.error("Gemini Analysis Error:", error);
 
     return {
       priorityScore: 50,
