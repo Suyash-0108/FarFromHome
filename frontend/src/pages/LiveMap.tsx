@@ -1,0 +1,170 @@
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import { PageWrapper } from '../components/PageWrapper';
+import { Card } from '../components/Card';
+import { Badge, type Severity } from '../components/Badge';
+import { Activity, Radio, Filter, Target } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+// Fix for default leaflet icons in React
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Custom Icon generator based on severity
+const createCustomIcon = (color: string, glow: boolean = false) => {
+  return L.divIcon({
+    className: 'custom-leaflet-icon',
+    html: `<div style="
+      background-color: ${color};
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: ${glow ? `0 0 20px ${color}, 0 0 40px ${color}` : `0 0 10px ${color}`};
+      ${glow ? 'animation: pulse-slow 2s infinite;' : ''}
+    "></div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+  });
+};
+
+const iconCritical = createCustomIcon('#EF4444', true);
+const iconHigh = createCustomIcon('#F97316');
+const iconMedium = createCustomIcon('#EAB308');
+const iconLow = createCustomIcon('#22C55E');
+
+type IncidentMarker = {
+  id: string;
+  lat: number;
+  lng: number;
+  severity: Severity;
+  type: string;
+  score: number;
+};
+
+const markers: IncidentMarker[] = [
+  { id: '8492', lat: 28.6328, lng: 77.2197, severity: 'Critical', type: 'Medical', score: 98 },
+  { id: '8491', lat: 28.5273, lng: 77.2789, severity: 'High', type: 'Fire', score: 85 },
+  { id: '8490', lat: 28.6315, lng: 77.2167, severity: 'Medium', type: 'Crime', score: 65 },
+  { id: '8489', lat: 28.5284, lng: 77.2182, severity: 'Critical', type: 'Women Safety', score: 95 },
+  { id: '8488', lat: 28.5802, lng: 77.0601, severity: 'Low', type: 'Medical', score: 40 },
+];
+
+export const LiveMap: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <PageWrapper className="h-[calc(100vh-8rem)] flex flex-col relative z-0">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Target className="w-6 h-6 text-primary" /> Live Operations Map
+        </h1>
+        <div className="flex gap-2">
+          <button className="glass-button bg-background/50 border border-white/10 px-4 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-white/5">
+            <Radio className="w-4 h-4 text-primary" /> Live Feed
+          </button>
+          <button className="glass-button bg-background/50 border border-white/10 p-2 rounded-lg hover:bg-white/5">
+            <Filter className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <Card className="flex-1 p-0 overflow-hidden relative border border-white/10">
+        
+        {/* Floating Overlay Panel */}
+        <div className="absolute top-4 right-4 z-[400] w-64 space-y-2 pointer-events-none">
+          <Card className="p-4 bg-background/80 backdrop-blur-xl border-white/10 shadow-2xl pointer-events-auto">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3">Status Overview</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="flex items-center gap-2 text-critical"><div className="w-2 h-2 rounded-full bg-critical shadow-[0_0_8px_rgba(239,68,68,0.8)]"/> Critical</span>
+                <span className="font-mono font-bold">2</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="flex items-center gap-2 text-high"><div className="w-2 h-2 rounded-full bg-high"/> High</span>
+                <span className="font-mono font-bold">1</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="flex items-center gap-2 text-medium"><div className="w-2 h-2 rounded-full bg-medium"/> Medium</span>
+                <span className="font-mono font-bold">1</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="flex items-center gap-2 text-low"><div className="w-2 h-2 rounded-full bg-low"/> Low</span>
+                <span className="font-mono font-bold">1</span>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-primary font-medium">
+              <Activity className="w-3 h-3 animate-pulse" /> Scanning Sector 4
+            </div>
+          </Card>
+        </div>
+
+        <MapContainer 
+          center={[28.6139, 77.2090]} 
+          zoom={11} 
+          className="w-full h-full z-0"
+          zoomControl={false}
+        >
+          {/* Dark Mode Map Tiles (CartoDB Dark Matter) */}
+          <TileLayer
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          />
+          
+          {markers.map((marker) => (
+            <Marker 
+              key={marker.id} 
+              position={[marker.lat, marker.lng]}
+              icon={
+                marker.severity === 'Critical' ? iconCritical :
+                marker.severity === 'High' ? iconHigh :
+                marker.severity === 'Medium' ? iconMedium : iconLow
+              }
+            >
+              <Popup className="custom-popup">
+                <div className="bg-background border border-white/10 rounded-lg p-3 text-white min-w-[200px] shadow-2xl">
+                  <div className="flex justify-between items-start mb-2">
+                    <Badge severity={marker.severity} variant="solid" className="text-[10px]" />
+                    <span className="text-xs font-mono text-gray-500">#{marker.id}</span>
+                  </div>
+                  <h4 className="font-bold text-sm mb-1">{marker.type} Emergency</h4>
+                  <div className="flex justify-between text-xs text-gray-400 mb-3">
+                    <span>AI Score</span>
+                    <span className={marker.severity === 'Critical' ? 'text-critical font-bold' : ''}>{marker.score}/100</span>
+                  </div>
+                  <button 
+                    onClick={() => navigate(`/incident/${marker.id}`)}
+                    className="w-full bg-primary/20 text-primary py-1.5 rounded text-xs font-bold hover:bg-primary/30 transition-colors"
+                  >
+                    View Details
+                  </button>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </Card>
+      
+      {/* Global CSS adjustments for Popup to override Leaflet default white bg */}
+      <style>{`
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+          background-color: transparent !important;
+          box-shadow: none !important;
+        }
+        .leaflet-popup-content {
+          margin: 0 !important;
+        }
+        .leaflet-container a.leaflet-popup-close-button {
+          color: white !important;
+          padding: 8px 12px 0 0 !important;
+          z-index: 10 !important;
+        }
+      `}</style>
+    </PageWrapper>
+  );
+};

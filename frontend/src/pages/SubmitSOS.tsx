@@ -5,22 +5,93 @@ import { PageWrapper } from '../components/PageWrapper';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { useNavigate } from 'react-router-dom';
-
+import API from "../services/api";
 export const SubmitSOS: React.FC = () => {
-  const navigate = useNavigate();
-  const [desc, setDesc] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const navigate = useNavigate();
+
+const [desc, setDesc] = useState("");
+const [emergencyType, setEmergencyType] = useState("Medical");
+
+const [latitude, setLatitude] = useState("");
+const [longitude, setLongitude] = useState("");
+
+const [image, setImage] = useState<File | null>(null);
+
+const [incidentData, setIncidentData] = useState<any>(null);
+
+const [isSubmitting, setIsSubmitting] = useState(false);
+const [showModal, setShowModal] = useState(false);
+
+const getLocation = () => {
+  console.log("Location button clicked");
+
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      console.log("Location received:", position);
+
+      setLatitude(position.coords.latitude.toString());
+      setLongitude(position.coords.longitude.toString());
+
+      alert("Location captured successfully");
+    },
+    (error) => {
+      console.error("Geolocation Error:", error);
+
+      alert(
+        `Location Error: ${error.message}`
+      );
+    }
+  );
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+if (!latitude || !longitude) {
+    alert("Please click 'Use My Location' first");
+    return;
+  }
+  try {
     setIsSubmitting(true);
-    // Simulate API call and AI Processing
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setShowModal(true);
-    }, 2000);
-  };
+
+    const formData = new FormData();
+
+    formData.append("type", emergencyType);
+    formData.append("description", desc);
+    formData.append("latitude", latitude);
+    formData.append("longitude", longitude);
+
+    if (image) {
+      formData.append("image", image);
+    }
+
+    const response = await API.post(
+      "/incidents",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    console.log(response.data);
+
+    setIncidentData(response.data.incident);
+
+    setShowModal(true);
+  } catch (error) {
+    console.error(error);
+    alert("Failed to submit SOS");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <PageWrapper className="max-w-6xl mx-auto">
@@ -86,9 +157,12 @@ export const SubmitSOS: React.FC = () => {
                 <span className="text-sm font-medium">Upload Image</span>
               </button>
               
-              <button type="button" className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/20 rounded-lg p-4 hover:bg-white/5 transition-colors text-gray-400 hover:text-primary hover:border-primary">
-                <MapPin className="w-6 h-6" />
-                <span className="text-sm font-medium">Use My Location</span>
+              <button
+                type="button"
+                 onClick={getLocation}
+                className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-white/20 rounded-lg p-4 hover:bg-white/5 transition-colors text-gray-400 hover:text-primary hover:border-primary">
+                <MapPin />
+                  <span>Use My Location</span>
               </button>
             </div>
 
@@ -132,24 +206,30 @@ export const SubmitSOS: React.FC = () => {
                 <div className="bg-background/50 rounded-lg p-4 space-y-4 mb-8 text-left border border-white/5">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Incident ID</span>
-                    <span className="font-mono font-bold text-primary">#INC-8492</span>
+                    <span className="font-mono font-bold text-primary">
+                    {incidentData?._id}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">Severity Assessment</span>
-                    <Badge severity="Critical" />
+                    <Badge severity={incidentData?.severity ||"Medium"} />
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-400 text-sm">AI Priority Score</span>
-                    <span className="font-bold text-critical">98/100</span>
+                    <span className="font-bold text-critical">
+                     {incidentData?.priorityScore}/100
+                    </span>
                   </div>
                   <div className="pt-2 border-t border-white/10">
                     <span className="text-gray-400 text-sm block mb-1">AI Reasoning</span>
-                    <p className="text-sm font-medium">Keywords match high-risk scenario. Location correlates with recent activity. Immediate police dispatch recommended.</p>
+                    <p className="text-sm font-medium">
+                    {incidentData?.reasoning}
+                    </p>
                   </div>
                 </div>
 
                 <button 
-                  onClick={() => navigate('/incident/8492')}
+                  onClick={() => navigate(`/incident/${incidentData?._id}`)}
                   className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary/90 transition-colors shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                 >
                   View Live Tracking

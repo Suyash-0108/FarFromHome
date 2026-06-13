@@ -1,21 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Users, ShieldCheck, AlertTriangle, Search, Filter, ArrowUpRight, TrendingUp } from 'lucide-react';
 import { PageWrapper } from '../components/PageWrapper';
 import { Card } from '../components/Card';
 import { Badge, type Severity } from '../components/Badge';
 import { useNavigate } from 'react-router-dom';
-
+import API from '../services/api';
 export const OperatorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [incidents, setIncidents] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>(null);
+ useEffect(() => {
+  fetchIncidents();
+  fetchStats();
+}, []);
 
-  const stats = [
-    { label: 'Total Active', value: '1,284', icon: Activity, color: 'text-primary' },
-    { label: 'Critical Cases', value: '32', icon: AlertTriangle, color: 'text-critical', glow: true },
-    { label: 'Responders Deployed', value: '450', icon: Users, color: 'text-blue-400' },
-    { label: 'Resolved (24h)', value: '892', icon: ShieldCheck, color: 'text-low' },
-  ];
+const fetchIncidents = async () => {
+  try {
+    const res = await API.get("/incidents");
+
+    console.log("Incidents:", res.data);
+
+    setIncidents(res.data.incidents);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const fetchStats = async () => {
+  try {
+    const res = await API.get("/dashboard/stats");
+
+    console.log("Stats:", res.data);
+
+    setStats(res.data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const statCards = [
+  {
+    label: "Total Active",
+    value: stats?.total || 0,
+    icon: Activity,
+    color: "text-primary",
+  },
+  {
+    label: "Critical Cases",
+    value: stats?.critical || 0,
+    icon: AlertTriangle,
+    color: "text-critical",
+    glow: true,
+  },
+  {
+    label: "Assigned",
+    value: stats?.assigned || 0,
+    icon: Users,
+    color: "text-blue-400",
+  },
+  {
+    label: "Resolved",
+    value: stats?.resolved || 0,
+    icon: ShieldCheck,
+    color: "text-low",
+  },
+];
 
   type Incident = {
     id: string;
@@ -27,13 +78,7 @@ export const OperatorDashboard: React.FC = () => {
     time: string;
   };
 
-  const incidents: Incident[] = [
-    { id: '#INC-8492', type: 'Medical', priority: 98, severity: 'Critical', status: 'Open', location: 'Rajiv Chowk Metro Station', time: '2m ago' },
-    { id: '#INC-8491', type: 'Fire', priority: 85, severity: 'High', status: 'Assigned', location: 'Okhla Industrial Area', time: '12m ago' },
-    { id: '#INC-8490', type: 'Crime', priority: 65, severity: 'Medium', status: 'Open', location: 'Connaught Place, Block C', time: '18m ago' },
-    { id: '#INC-8489', type: 'Women Safety', priority: 95, severity: 'Critical', status: 'Assigned', location: 'Select Citywalk Parking', time: '21m ago' },
-    { id: '#INC-8488', type: 'Medical', priority: 40, severity: 'Low', status: 'Resolved', location: 'Dwarka Sector 10', time: '45m ago' },
-  ];
+  
 
   return (
     <PageWrapper className="h-full flex flex-col">
@@ -60,7 +105,7 @@ export const OperatorDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat, idx) => (
+        {statsCards.map((stat, idx) => (
           <Card key={idx} glowEffect={stat.glow} className={`p-5 ${stat.glow ? 'border-critical/30 bg-critical/5' : ''}`}>
             <div className="flex justify-between items-start mb-2">
               <div className={`p-2 rounded-lg bg-white/5 ${stat.color}`}>
@@ -98,39 +143,71 @@ export const OperatorDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {incidents.map((inc, idx) => (
-                  <motion.tr 
-                    key={inc.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                    onClick={() => navigate(`/incident/${inc.id.replace('#INC-', '')}`)}
-                  >
-                    <td className="p-4 font-mono text-gray-300">{inc.id}</td>
-                    <td className="p-4 font-medium">{inc.type}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Badge severity={inc.severity} />
-                        <span className="text-xs text-gray-500 font-mono">{inc.priority}/100</span>
-                      </div>
-                    </td>
-                    <td className="p-4 text-gray-300">
-                      <span className={`flex items-center gap-1.5 ${inc.status === 'Open' ? 'text-critical' : inc.status === 'Assigned' ? 'text-primary' : 'text-gray-500'}`}>
-                         {inc.status === 'Open' && <span className="w-1.5 h-1.5 rounded-full bg-critical animate-pulse" />}
-                         {inc.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-gray-400 truncate max-w-[150px]">{inc.location}</td>
-                    <td className="p-4 text-gray-400">{inc.time}</td>
-                    <td className="p-4 text-right">
-                      <button className="text-gray-500 group-hover:text-primary transition-colors p-1">
-                        <ArrowUpRight className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
+  {incidents.map((incident, idx) => (
+    <motion.tr
+      key={incident._id}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.05 }}
+      className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+      onClick={() => navigate(`/incident/${incident._id}`)}
+    >
+      <td className="p-4 font-mono text-gray-300">
+        {incident._id?.slice(-6)}
+      </td>
+
+      <td className="p-4 font-medium">
+        {incident.type}
+      </td>
+
+      <td className="p-4">
+        <div className="flex items-center gap-2">
+          <Badge severity={incident.severity} />
+
+          <span className="text-xs text-gray-500 font-mono">
+            {incident.priorityScore}/100
+          </span>
+        </div>
+      </td>
+
+      <td className="p-4 text-gray-300">
+        <span
+          className={`flex items-center gap-1.5 ${
+            incident.status === "Open"
+              ? "text-critical"
+              : incident.status === "Assigned"
+              ? "text-primary"
+              : "text-gray-500"
+          }`}
+        >
+          {incident.status === "Open" && (
+            <span className="w-1.5 h-1.5 rounded-full bg-critical animate-pulse" />
+          )}
+
+          {incident.status}
+        </span>
+      </td>
+
+      <td className="p-4 text-gray-400 truncate max-w-[150px]">
+        {incident.latitude?.toFixed(4)},
+        {" "}
+        {incident.longitude?.toFixed(4)}
+      </td>
+
+      <td className="p-4 text-gray-400">
+        {new Date(
+          incident.createdAt
+        ).toLocaleString()}
+      </td>
+
+      <td className="p-4 text-right">
+        <button className="text-gray-500 group-hover:text-primary transition-colors p-1">
+          <ArrowUpRight className="w-4 h-4" />
+        </button>
+      </td>
+    </motion.tr>
+  ))}
+</tbody>
             </table>
           </div>
         </Card>
