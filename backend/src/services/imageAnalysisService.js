@@ -1,4 +1,4 @@
-import ai from "../config/gemini.js";
+
 
 export const analyzeImage = async (base64Image, mimeType) => {
   try {
