@@ -13,6 +13,23 @@ export const IncidentDetails: React.FC = () => {
   const [incident, setIncident] = useState<any>(null);
   useEffect(() => {
     fetchIncident();
+    const handleResolve = async () => {
+  try {
+    const res = await API.patch(
+      `/incidents/${id}/status`,
+      {
+        status: "Resolved",
+      }
+    );
+
+    setIncident(res.data.incident);
+
+    navigate("/dashboard");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to resolve incident");
+  }
+};
   }, []);
 
   const fetchIncident = async () => {
@@ -26,6 +43,23 @@ export const IncidentDetails: React.FC = () => {
       console.error(error);
     }
   };
+  const handleResolve = async () => {
+  try {
+    const res = await API.patch(
+      `/incidents/${id}/status`,
+      {
+        status: "Resolved",
+      }
+    );
+
+    setIncident(res.data.incident);
+
+    navigate("/dashboard");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to resolve incident");
+  }
+};
   if (!incident) {
     return (
       <PageWrapper>
@@ -85,10 +119,15 @@ export const IncidentDetails: React.FC = () => {
           Assign Unit
         </button>
 
-        <button className="glass-button bg-white/5 hover:bg-white/10 text-white border border-white/10 px-4 py-2 rounded-lg font-bold flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-low" />
-          Mark Resolved
-        </button>
+        {incident.status !== "Resolved" && (
+  <button
+    onClick={handleResolve}
+    className="glass-button bg-white/5 hover:bg-white/10 text-white border border-white/10 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+  >
+    <CheckCircle className="w-4 h-4 text-low" />
+    Mark Resolved
+  </button>
+)}
       </div>
     </div>
 
