@@ -12,7 +12,6 @@ export const OperatorDashboard: React.FC = () => {
   const [incidents, setIncidents] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
  useEffect(() => {
   fetchIncidents();
   fetchStats();
