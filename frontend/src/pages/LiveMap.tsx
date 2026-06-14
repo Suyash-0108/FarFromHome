@@ -40,12 +40,13 @@ const iconMedium = createCustomIcon('#EAB308');
 const iconLow = createCustomIcon('#22C55E');
 
 type Incident = {
-  id: string;
-  lat: number;
-  lng: number;
+  _id: string;
+  latitude: number;
+  longitude: number;
   severity: Severity;
   type: string;
-  score: number;
+  priorityScore: number;
+  description: string;
 };
 
 
