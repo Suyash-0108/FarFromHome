@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L, { LatLngExpression } from "leaflet";
+import L  from "leaflet";
+import type { LatLngExpression } from "leaflet";
 import { useNavigate } from "react-router-dom";
 
 import { PageWrapper } from "../components/PageWrapper";
