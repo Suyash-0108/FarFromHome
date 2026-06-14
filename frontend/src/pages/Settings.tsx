@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   User,
   Bell,
-  Palette,
   Shield,
   Map,
   Brain,
