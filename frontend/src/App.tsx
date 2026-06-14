@@ -10,7 +10,7 @@ import { LiveMap } from './pages/LiveMap';
 import { IncidentDetails } from './pages/IncidentDetails';
 import Settings from "./pages/Settings";
 import Alerts from "./pages/Alerts";
-import IncidentLogs from "./pages/IncidentLogs";
+
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -24,7 +24,7 @@ const AnimatedRoutes = () => {
           <Route path="/map" element={<LiveMap />} />
           <Route path="/sos" element={<SubmitSOS />} />
           <Route path="/incident/:id" element={<IncidentDetails />} />
-          <Route path="/incidents" element={<IncidentLogs />} />
+          
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/settings" element={<Settings />} />
         </Route>

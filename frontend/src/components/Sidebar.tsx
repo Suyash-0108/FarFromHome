@@ -7,7 +7,6 @@ export const Sidebar: React.FC = () => {
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Live Map', path: '/map', icon: Map },
-    { name: 'Incident Logs', path: '/incidents', icon: FileText },
     { name: 'Submit SOS', path: '/sos', icon: Send },
   ];
 
