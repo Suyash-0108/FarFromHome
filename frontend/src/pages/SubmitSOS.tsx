@@ -147,13 +147,17 @@ export const SubmitSOS: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Emergency Type</label>
-              <select className="w-full bg-background/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-primary transition-colors">
-                <option value="medical">Medical Emergency</option>
-                <option value="crime">Crime in Progress</option>
-                <option value="fire">Fire Breakout</option>
-                <option value="women_safety">Women Safety Issue</option>
-                <option value="disaster">Natural Disaster</option>
-              </select>
+             <select
+            value={emergencyType}
+            onChange={(e) => setEmergencyType(e.target.value)}
+            className="w-full bg-background/50 border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-primary transition-colors"
+            > 
+            <option value="Medical">Medical Emergency</option>
+            <option value="Crime">Crime in Progress</option>
+            <option value="Fire">Fire Breakout</option>
+            <option value="Women Safety">Women Safety Issue</option>
+            <option value="Disaster">Natural Disaster</option>
+            </select>
             </div>
 
             <div>

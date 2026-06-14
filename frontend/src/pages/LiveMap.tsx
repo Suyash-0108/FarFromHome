@@ -6,7 +6,8 @@ import { Card } from '../components/Card';
 import { Badge, type Severity } from '../components/Badge';
 import { Activity, Radio, Filter, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
+import API from "../services/api";
+import { useEffect, useState } from "react";
 // Fix for default leaflet icons in React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -38,7 +39,7 @@ const iconHigh = createCustomIcon('#F97316');
 const iconMedium = createCustomIcon('#EAB308');
 const iconLow = createCustomIcon('#22C55E');
 
-type IncidentMarker = {
+type Incident = {
   id: string;
   lat: number;
   lng: number;
@@ -47,17 +48,39 @@ type IncidentMarker = {
   score: number;
 };
 
-const markers: IncidentMarker[] = [
-  { id: '8492', lat: 28.6328, lng: 77.2197, severity: 'Critical', type: 'Medical', score: 98 },
-  { id: '8491', lat: 28.5273, lng: 77.2789, severity: 'High', type: 'Fire', score: 85 },
-  { id: '8490', lat: 28.6315, lng: 77.2167, severity: 'Medium', type: 'Crime', score: 65 },
-  { id: '8489', lat: 28.5284, lng: 77.2182, severity: 'Critical', type: 'Women Safety', score: 95 },
-  { id: '8488', lat: 28.5802, lng: 77.0601, severity: 'Low', type: 'Medical', score: 40 },
-];
 
 export const LiveMap: React.FC = () => {
   const navigate = useNavigate();
+  const [incidents, setIncidents] = useState<Incident[]>([]);
 
+  const fetchIncidents = async () => {
+    try {
+      const res = await API.get("/incidents");
+
+      setIncidents(res.data.incidents || []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIncidents();
+  }, []);
+  const criticalCount = incidents.filter(
+    (i) => i.severity === "Critical"
+  ).length;
+
+  const highCount = incidents.filter(
+    (i) => i.severity === "High"
+  ).length;
+
+  const mediumCount = incidents.filter(
+    (i) => i.severity === "Medium"
+  ).length;
+
+  const lowCount = incidents.filter(
+    (i) => i.severity === "Low"
+  ).length;
   return (
     <PageWrapper className="h-[calc(100vh-8rem)] flex flex-col relative z-0">
       <div className="flex justify-between items-center mb-4">
@@ -83,23 +106,23 @@ export const LiveMap: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="flex items-center gap-2 text-critical"><div className="w-2 h-2 rounded-full bg-critical shadow-[0_0_8px_rgba(239,68,68,0.8)]"/> Critical</span>
-                <span className="font-mono font-bold">2</span>
+                <span className="font-mono font-bold">{criticalCount}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="flex items-center gap-2 text-high"><div className="w-2 h-2 rounded-full bg-high"/> High</span>
-                <span className="font-mono font-bold">1</span>
+                <span className="font-mono font-bold">{highCount}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="flex items-center gap-2 text-medium"><div className="w-2 h-2 rounded-full bg-medium"/> Medium</span>
-                <span className="font-mono font-bold">1</span>
+                <span className="font-mono font-bold">{mediumCount}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="flex items-center gap-2 text-low"><div className="w-2 h-2 rounded-full bg-low"/> Low</span>
-                <span className="font-mono font-bold">1</span>
+                <span className="font-mono font-bold">{lowCount}</span>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-white/10 flex items-center gap-2 text-xs text-primary font-medium">
-              <Activity className="w-3 h-3 animate-pulse" /> Scanning Sector 4
+              <Activity className="w-3 h-3 animate-pulse" /> 
             </div>
           </Card>
         </div>
@@ -116,29 +139,44 @@ export const LiveMap: React.FC = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
           
-          {markers.map((marker) => (
+          {incidents.map((incident) => (
             <Marker 
-              key={marker.id} 
-              position={[marker.lat, marker.lng]}
+              key={incident._id} 
+              position={[
+              incident.latitude,
+               incident.longitude
+            ]}
               icon={
-                marker.severity === 'Critical' ? iconCritical :
-                marker.severity === 'High' ? iconHigh :
-                marker.severity === 'Medium' ? iconMedium : iconLow
-              }
+                incident.severity === "Critical"
+                ? iconCritical
+                : incident.severity === "High"
+                ? iconHigh
+                 : incident.severity === "Medium"
+                ? iconMedium
+                : iconLow
+                }
             >
               <Popup className="custom-popup">
                 <div className="bg-background border border-white/10 rounded-lg p-3 text-white min-w-[200px] shadow-2xl">
                   <div className="flex justify-between items-start mb-2">
-                    <Badge severity={marker.severity} variant="solid" className="text-[10px]" />
-                    <span className="text-xs font-mono text-gray-500">#{marker.id}</span>
+                    <Badge severity={incident.severity} variant="solid" className="text-[10px]" />
+                    <span className="text-xs font-mono text-gray-500">#{incident._id.slice(-6)}</span>
                   </div>
-                  <h4 className="font-bold text-sm mb-1">{marker.type} Emergency</h4>
+                  <h4 className="font-bold text-sm mb-1">{incident.type} Emergency</h4>
                   <div className="flex justify-between text-xs text-gray-400 mb-3">
                     <span>AI Score</span>
-                    <span className={marker.severity === 'Critical' ? 'text-critical font-bold' : ''}>{marker.score}/100</span>
+                    <span
+                    className={
+                    incident.severity === "Critical"
+                       ? "text-critical font-bold"
+                       : ""
+                       }
+                        >
+                       {incident.priorityScore}/100
+                      </span>
                   </div>
                   <button 
-                    onClick={() => navigate(`/incident/${marker.id}`)}
+                    onClick={() => navigate(`/incident/${incident._id}`)}
                     className="w-full bg-primary/20 text-primary py-1.5 rounded text-xs font-bold hover:bg-primary/30 transition-colors"
                   >
                     View Details
