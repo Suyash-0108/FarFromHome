@@ -35,12 +35,7 @@ export const Navbar: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-critical animate-pulse-slow shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-          <span className="text-xs text-gray-400 font-medium">System Online</span>
-        </div>
-      </div>
+      
     </nav>
   );
 };
