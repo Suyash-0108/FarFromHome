@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, MapPin, AlertTriangle, Activity, Camera, ShieldCheck, CheckCircle, Truck, Info } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, AlertTriangle, Activity, Camera, ShieldCheck, CheckCircle, Info } from 'lucide-react';
 import { PageWrapper } from '../components/PageWrapper';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
@@ -13,23 +13,9 @@ export const IncidentDetails: React.FC = () => {
   const [incident, setIncident] = useState<any>(null);
   useEffect(() => {
     fetchIncident();
-    const handleResolve = async () => {
-  try {
-    const res = await API.patch(
-      `/incidents/${id}/status`,
-      {
-        status: "Resolved",
-      }
-    );
-
-    setIncident(res.data.incident);
-
-    navigate("/dashboard");
-  } catch (error) {
-    console.error(error);
-    alert("Failed to resolve incident");
-  }
-};
+    <button onClick={handleResolve}>
+  Resolve Incident
+</button>
   }, []);
 
   const fetchIncident = async () => {
