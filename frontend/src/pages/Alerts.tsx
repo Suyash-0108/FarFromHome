@@ -103,29 +103,28 @@ export default function Alerts() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-4xl font-bold text-white">
-            Alerts Center
+            AI Incident Command Center
           </h1>
 
           <p className="text-slate-400 mt-2">
-            Real-time monitoring and incident notifications.
+            Real-time emergency monitoring and response coordination.
           </p>
         </div>
 
         <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/30">
-          <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
-
+          <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
           <span className="text-red-400 font-semibold">
             {activeCount} Active Alerts
           </span>
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Statistics */}
       <div className="grid md:grid-cols-5 gap-4">
         <div className="bg-slate-900 border border-red-500/20 rounded-xl p-5">
           <p className="text-slate-400 text-sm">Critical</p>
@@ -163,7 +162,7 @@ export default function Alerts() {
         </div>
       </div>
 
-      {/* Live Feed */}
+      {/* Alert Feed */}
       <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
         <div className="p-5 border-b border-slate-800 flex justify-between">
           <h2 className="text-xl font-semibold text-white">
@@ -188,26 +187,37 @@ export default function Alerts() {
                 <div
                   key={alert._id}
                   onClick={() =>
-                    navigate(`/dashboard/incidents/${alert._id}`)
+                    navigate(`/incident/${alert._id}`)
                   }
-                  className={`bg-[#091224] border ${style.border} rounded-xl p-5 transition hover:scale-[1.01] cursor-pointer`}
+                  className={`bg-[#091224] border ${style.border} rounded-xl p-5 transition hover:scale-[1.01] hover:border-primary cursor-pointer`}
                 >
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="flex-1">
                       <div
                         className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${style.badge}`}
                       >
                         {style.icon}
-                        {alert.type?.toUpperCase()}
+                        {alert.severity?.toUpperCase()}
                       </div>
 
                       <h3 className="text-white text-xl font-semibold mt-4">
-                        {alert.description}
+                        {alert.type} Incident
                       </h3>
 
-                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-slate-400">
+                      <p className="mt-2 text-slate-300">
+                        {alert.description}
+                      </p>
+
+                      <p className="mt-3 text-sm text-slate-400 line-clamp-2">
+                        {alert.reasoning}
+                      </p>
+
+                      <div className="flex flex-wrap gap-4 mt-4 text-sm text-slate-400">
                         <span>
-                          Priority: {alert.severity}
+                          Priority Score:{" "}
+                          <span className="text-red-400 font-semibold">
+                            {alert.priorityScore}/100
+                          </span>
                         </span>
 
                         <span>
@@ -221,7 +231,7 @@ export default function Alerts() {
                       </div>
                     </div>
 
-                    <span className="text-slate-500">
+                    <span className="text-slate-500 text-sm">
                       {alert.createdAt
                         ? new Date(
                             alert.createdAt
@@ -230,15 +240,13 @@ export default function Alerts() {
                     </span>
                   </div>
 
-                  <div className="mt-5">
+                  <div className="flex gap-3 mt-5">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(
-                          `/dashboard/incidents/${alert._id}`
-                        );
+                        navigate(`/incident/${alert._id}`);
                       }}
-                      className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 transition"
+                      className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 transition text-white"
                     >
                       View Details
                     </button>
