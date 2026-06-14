@@ -43,3 +43,27 @@ export const getDashboardStats = async (req, res) => {
     });
   }
 };
+
+export const getCategories = async (req, res) => {
+  try {
+    const categories = await Incident.aggregate([
+      {
+        $group: {
+          _id: "$type",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          count: -1,
+        },
+      },
+    ]);
+
+    res.status(200).json(categories);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  } 
+};
