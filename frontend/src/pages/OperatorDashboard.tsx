@@ -242,30 +242,14 @@ const filteredIncidents = incidents.filter((incident) => {
             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_10px_rgba(6,182,212,0.5)]">
               <TrendingUp className="w-4 h-4 text-primary" />
             </div>
+
             <h2 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">AI Intelligence</h2>
           </div>
 
-          <div className="space-y-6 flex-1 overflow-y-auto pr-2">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Predictive Trend</h3>
-              <div className="bg-background/50 rounded-lg p-4 border border-white/5">
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-2xl font-bold text-critical">+24%</span>
-                  <span className="text-xs text-gray-500">vs last hour</span>
-                </div>
-                <p className="text-sm text-gray-400">High probability of multi-vehicle collisions in Downtown area due to severe weather conditions starting in 15 mins.</p>
-              </div>
-            </div>
+           <div className="space-y-6 flex-1 overflow-y-auto pr-2">
 
-            <div>
-              <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">Resource Recommendation</h3>
-              <div className="bg-primary/10 rounded-lg p-4 border border-primary/20">
-                <p className="text-sm text-gray-300 mb-3">Pre-deploy 3 fire units and 2 ambulances to Sector 4 to minimize response delay.</p>
-                <button className="w-full bg-primary/20 hover:bg-primary/30 text-primary text-sm font-bold py-2 rounded transition-colors border border-primary/50">
-                  Authorize Pre-deployment
-                </button>
-              </div>
-            </div>
+
+            
             
             <div>
   <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
